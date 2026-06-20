@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { type Answers, type CompanyInfo } from "@/data/diagnosis";
 import { scoreDiagnosis } from "@/lib/scoring";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { hasLLM } from "@/lib/env";
 import { runAITask } from "@/lib/ai/task";
 import { diagnosisInsightTask } from "@/lib/ai/tasks/diagnosisInsight";
@@ -37,9 +37,9 @@ export async function POST(req: Request) {
   const { sessionId, companyInfo, answers } = body;
   const result = scoreDiagnosis(answers as unknown as Answers);
 
-  const supabase = getSupabaseAdmin();
+  const supabase = getUserClient(req);
 
-  // 未配置 Supabase → 不持久化，由客户端走 localStorage 兜底
+  // 未登录 / 未配置 Supabase → 不持久化，由客户端走 localStorage 兜底
   if (!supabase) {
     return NextResponse.json({ persisted: false, source: "rule", result });
   }

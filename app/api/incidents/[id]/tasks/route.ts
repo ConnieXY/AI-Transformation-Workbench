@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { transition } from "@/lib/workflow/incident";
 import type { IncidentAnalysis } from "@/lib/schemas/incident";
 
@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 
 /** 根据 AI 分析的 nextTasks 物化为闭环任务（初始全部「待确认」，由人推进）。 */
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } },
 ) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return NextResponse.json({ error: "db not configured" }, { status: 503 });
+  const supabase = getUserClient(req);
+  if (!supabase) return NextResponse.json({ error: "not authenticated" }, { status: 401 });
 
   const { data: analysisRow } = await supabase
     .from("incident_analyses")

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   }
   const { sessionId, incident } = body;
 
-  const supabase = getSupabaseAdmin();
+  const supabase = getUserClient(req);
   if (!supabase) return NextResponse.json({ persisted: false });
 
   const { data, error } = await supabase

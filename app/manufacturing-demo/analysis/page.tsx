@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import {
   type IncidentInput,
   INCIDENT_STORAGE_KEY,
@@ -80,7 +81,7 @@ export default function AnalysisPage() {
 
     (async () => {
       try {
-        const res = await fetch(`/api/incidents/${id}`);
+        const res = await apiFetch(`/api/incidents/${id}`);
         if (!res.ok) throw new Error("not found");
         const d = await res.json();
         const inc = d.incident;
@@ -103,7 +104,7 @@ export default function AnalysisPage() {
           setSource((d.analysisSource as "llm" | "rule") ?? "llm");
         } else {
           // 尚未分析 → 触发 AI 分析
-          const ar = await fetch(`/api/incidents/${id}/analyze`, {
+          const ar = await apiFetch(`/api/incidents/${id}/analyze`, {
             method: "POST",
           });
           const a = await ar.json();
@@ -130,7 +131,7 @@ export default function AnalysisPage() {
     }
     setAdvancing(true);
     try {
-      await fetch(`/api/incidents/${incidentId}/tasks`, { method: "POST" });
+      await apiFetch(`/api/incidents/${incidentId}/tasks`, { method: "POST" });
     } catch {
       // 忽略，仍跳转
     }

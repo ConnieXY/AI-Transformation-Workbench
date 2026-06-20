@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import CompanyInfoForm from "@/components/diagnosis/CompanyInfoForm";
 import QuestionItem from "@/components/diagnosis/QuestionItem";
 import { getSessionId } from "@/lib/sessionId";
@@ -80,7 +81,7 @@ export default function QuestionnairePage() {
     // 尝试持久化到后端（成功则用 id 跳转，失败则回落 localStorage 流程）
     setSubmitting(true);
     try {
-      const res = await fetch("/api/diagnosis", {
+      const res = await apiFetch("/api/diagnosis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

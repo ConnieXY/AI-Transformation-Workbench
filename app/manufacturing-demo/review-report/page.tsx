@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import ReviewReportView from "@/components/manufacturing/ReviewReportView";
+import { apiFetch } from "@/lib/api";
 import {
   type IncidentInput,
   INCIDENT_STORAGE_KEY,
@@ -68,13 +69,13 @@ export default function ReviewReportPage() {
     setLoading(true);
     (async () => {
       try {
-        let res = await fetch(`/api/incidents/${id}/review`);
+        let res = await apiFetch(`/api/incidents/${id}/review`);
         let d = res.ok ? await res.json() : null;
         // 尚未生成 → 触发一次生成
         if (d && !d.report) {
-          const g = await fetch(`/api/incidents/${id}/review`, { method: "POST" });
+          const g = await apiFetch(`/api/incidents/${id}/review`, { method: "POST" });
           if (g.ok) {
-            res = await fetch(`/api/incidents/${id}/review`);
+            res = await apiFetch(`/api/incidents/${id}/review`);
             d = res.ok ? await res.json() : d;
           }
         }

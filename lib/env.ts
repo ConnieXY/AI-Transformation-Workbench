@@ -8,8 +8,10 @@ function read(name: string): string {
 }
 
 export const env = {
-  supabaseUrl: read("SUPABASE_URL"),
+  supabaseUrl: read("SUPABASE_URL") || read("NEXT_PUBLIC_SUPABASE_URL"),
   supabaseServiceRoleKey: read("SUPABASE_SERVICE_ROLE_KEY"),
+  supabaseAnonKey:
+    read("SUPABASE_ANON_KEY") || read("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
 
   llmProvider: read("LLM_PROVIDER") || "openai-compatible",
   llmBaseUrl: read("LLM_BASE_URL") || "https://api.openai.com/v1",

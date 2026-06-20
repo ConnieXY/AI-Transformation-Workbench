@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { runAITask } from "@/lib/ai/task";
 import { incidentReviewTask } from "@/lib/ai/tasks/incidentReview";
 import { transition } from "@/lib/workflow/incident";
@@ -11,15 +11,15 @@ export const dynamic = "force-dynamic";
 
 /** 读取最新复盘报告（含异常上下文，供报告页渲染）。 */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } },
 ) {
   if (params.id === FEATURED.incidentId) {
     return NextResponse.json(featuredIncidentReview);
   }
 
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return NextResponse.json({ error: "db not configured" }, { status: 503 });
+  const supabase = getUserClient(req);
+  if (!supabase) return NextResponse.json({ error: "not authenticated" }, { status: 401 });
 
   const { data: incident } = await supabase
     .from("incidents")
@@ -45,11 +45,11 @@ export async function GET(
 }
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } },
 ) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return NextResponse.json({ error: "db not configured" }, { status: 503 });
+  const supabase = getUserClient(req);
+  if (!supabase) return NextResponse.json({ error: "not authenticated" }, { status: 401 });
 
   const { data: incident, error } = await supabase
     .from("incidents")

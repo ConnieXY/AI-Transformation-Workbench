@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { runAITask } from "@/lib/ai/task";
 import { solutionTask } from "@/lib/ai/tasks/solution";
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid body", detail: String(e) }, { status: 400 });
   }
   const { sessionId, input } = body;
-  const supabase = getSupabaseAdmin();
+  const supabase = getUserClient(req);
 
   // 先建记录拿 id（便于 trace 关联）；无 DB 时用占位
   let id: string | null = null;

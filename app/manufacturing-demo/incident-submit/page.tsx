@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import { getSessionId } from "@/lib/sessionId";
 import {
   type IncidentInput,
@@ -54,7 +55,7 @@ export default function IncidentSubmitPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/incidents", {
+      const res = await apiFetch("/api/incidents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: getSessionId(), incident }),

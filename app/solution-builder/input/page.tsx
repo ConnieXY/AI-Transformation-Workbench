@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import ChipMultiSelect from "@/components/solution/ChipMultiSelect";
 import { getSessionId } from "@/lib/sessionId";
 import { SOLUTION_CONTEXT_KEY } from "@/data/diagnosis";
@@ -110,7 +111,7 @@ export default function SolutionInputPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/solutions", {
+      const res = await apiFetch("/api/solutions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: getSessionId(), input }),

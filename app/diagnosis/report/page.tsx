@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import ScoreBar from "@/components/diagnosis/ScoreBar";
 import {
   type DiagnosisSubmission,
@@ -81,7 +82,7 @@ export default function ReportPage() {
 
     // 优先从后端按 id 读取（真实持久化）
     setLoading(true);
-    fetch(`/api/diagnosis/${id}`)
+    apiFetch(`/api/diagnosis/${id}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
       .then((d) => {
         setSubmission({

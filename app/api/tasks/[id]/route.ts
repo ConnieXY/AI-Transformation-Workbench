@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { transition } from "@/lib/workflow/incident";
 
 export const runtime = "nodejs";
@@ -18,8 +18,8 @@ export async function PATCH(
   req: Request,
   { params }: { params: { id: string } },
 ) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return NextResponse.json({ error: "db not configured" }, { status: 503 });
+  const supabase = getUserClient(req);
+  if (!supabase) return NextResponse.json({ error: "not authenticated" }, { status: 401 });
 
   let body: z.infer<typeof BodySchema>;
   try {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { FEATURED, featuredIncident } from "@/data/featured";
 
 export const runtime = "nodejs";
@@ -7,15 +7,15 @@ export const dynamic = "force-dynamic";
 
 /** 聚合返回：异常 + 最新分析 + 任务 + 状态流转事件。 */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } },
 ) {
   if (params.id === FEATURED.incidentId) {
     return NextResponse.json(featuredIncident);
   }
 
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return NextResponse.json({ error: "db not configured" }, { status: 503 });
+  const supabase = getUserClient(req);
+  if (!supabase) return NextResponse.json({ error: "not authenticated" }, { status: 401 });
 
   const { data: incident, error } = await supabase
     .from("incidents")

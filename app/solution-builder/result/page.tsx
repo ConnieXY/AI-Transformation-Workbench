@@ -7,6 +7,7 @@ import GroundedSolutionView from "@/components/solution/GroundedSolutionView";
 import { type SolutionInput, SOLUTION_INPUT_KEY } from "@/data/solution";
 import type { GroundedSolution, SolutionSource } from "@/lib/schemas/solution";
 import { solutionFallback } from "@/lib/solution/fallback";
+import { apiFetch } from "@/lib/api";
 
 interface GroundedPayload {
   input: SolutionInput;
@@ -40,7 +41,7 @@ export default function SolutionResultPage() {
       return;
     }
     setLoading(true);
-    fetch(`/api/solutions/${id}`)
+    apiFetch(`/api/solutions/${id}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
       .then((d) => {
         if (d?.grounded?.recommendations) {

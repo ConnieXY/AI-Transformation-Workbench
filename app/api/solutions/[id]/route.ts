@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getUserClient } from "@/lib/supabase/userClient";
 import { FEATURED, featuredSolution } from "@/data/featured";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } },
 ) {
   if (params.id === FEATURED.solutionId) {
     return NextResponse.json(featuredSolution);
   }
 
-  const supabase = getSupabaseAdmin();
+  const supabase = getUserClient(req);
   if (!supabase) {
-    return NextResponse.json({ error: "db not configured" }, { status: 503 });
+    return NextResponse.json({ error: "not authenticated" }, { status: 401 });
   }
   const { data, error } = await supabase
     .from("solutions")

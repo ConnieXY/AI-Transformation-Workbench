@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 import TaskCard from "@/components/manufacturing/TaskCard";
 import {
   type IncidentInput,
@@ -37,7 +38,7 @@ export default function TaskBoardPage() {
   const [reviewing, setReviewing] = useState(false);
 
   async function loadFromApi(id: string) {
-    const res = await fetch(`/api/incidents/${id}`);
+    const res = await apiFetch(`/api/incidents/${id}`);
     if (!res.ok) throw new Error("not found");
     const d = await res.json();
     setDbTasks(d.tasks as DbTask[]);
@@ -72,7 +73,7 @@ export default function TaskBoardPage() {
       prev ? prev.map((t) => (t.id === taskId ? { ...t, status } : t)) : prev,
     );
     try {
-      await fetch(`/api/tasks/${taskId}`, {
+      await apiFetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -91,7 +92,7 @@ export default function TaskBoardPage() {
     }
     setReviewing(true);
     try {
-      await fetch(`/api/incidents/${incidentId}/review`, { method: "POST" });
+      await apiFetch(`/api/incidents/${incidentId}/review`, { method: "POST" });
     } catch {
       // 忽略，仍跳转
     }
