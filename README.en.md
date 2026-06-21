@@ -8,6 +8,16 @@
 
 Built around a **Diagnose → Design → Deliver** spine that connects three modules, with a **manufacturing quality-incident closed loop** as the fully worked example. The scenarios come from real pain points of manufacturing clients (automotive electronics / semiconductor).
 
+```mermaid
+flowchart TB
+  subgraph Journey["🚀 One transformation journey · Diagnose → Design → Deliver"]
+    direction LR
+    A["① Diagnose<br/>6D maturity score → gaps"] --> B["② Design<br/>RAG grounded · cited sources"] --> C["③ Deliver<br/>root-cause → tasks → review · HITL · outcome metrics"]
+  end
+  B -. retrieve .-> KB[("📚 pgvector knowledge base")]
+  Journey --> Base["⚙️ Engineering base · structured output Zod · Trace observability · Eval + CI gate · RLS isolation · rate limit and cost cap · graceful degradation"]
+```
+
 ---
 
 ## See it in one minute (real AI outputs)
@@ -56,6 +66,8 @@ The three modules are not isolated tools — each step's output is the next step
 
 ## Documentation
 
+👉 **[Documentation hub: docs/](docs/README.md)** — entry to all docs. Non-technical readers can jump straight to the product guide: [中文](docs/USER_GUIDE.md) ｜ [English](docs/USER_GUIDE.en.md).
+
 | Doc | Contents |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture overview + data-flow diagram (Mermaid) |
@@ -86,4 +98,4 @@ npm run eval:ci                # recorded-eval replay (no keys, offline)
 
 ## Author
 
-By **Connie Wang** — Customer Success / Commercialization / B2B product. Designed and built from scratch with [Claude Code](https://claude.com/claude-code).
+By **Connie Wang** — AI FDE / AI Application Delivery / Customer Success. Designed and built from scratch with [Claude Code](https://claude.com/claude-code).

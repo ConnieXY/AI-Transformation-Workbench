@@ -8,6 +8,16 @@
 
 以「**Diagnose → Design → Deliver**」为方法主线，串起三个模块，并以**制造业质量异常闭环**作为完整样板。落地场景源自作者服务汽车电子/半导体等制造业客户的真实痛点。
 
+```mermaid
+flowchart TB
+  subgraph Journey["🚀 一条转型旅程 · Diagnose → Design → Deliver"]
+    direction LR
+    A["① 诊断<br/>6D 成熟度评分 → 短板"] --> B["② 方案<br/>RAG grounded · 强制引用来源"] --> C["③ 闭环<br/>根因 → 任务 → 复盘 · 人机协同 · 成效指标"]
+  end
+  B -. 检索 .-> KB[("📚 pgvector 知识库")]
+  Journey --> Base["⚙️ 工程底座 · 结构化输出 Zod · Trace 可观测 · Eval + CI 门禁 · RLS 数据隔离 · 限流与成本上限 · 优雅降级"]
+```
+
 ---
 
 ## 一分钟看懂（直接体验真实 AI 产物）
@@ -46,6 +56,8 @@ Next.js 14（App Router）· React 18 · TypeScript · Tailwind · Supabase（Po
 
 ## 文档
 
+👉 **[文档中心 docs/](docs/README.md)** —— 所有文档入口。面向非技术用户可直接看产品介绍手册：[中文](docs/USER_GUIDE.md) ｜ [English](docs/USER_GUIDE.en.md)。
+
 | 文档 | 内容 |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构总览 + 数据流图（Mermaid） |
@@ -76,4 +88,4 @@ npm run eval:ci                # 录制式 eval 回放（无密钥、离线）
 
 ## 作者
 
-By **Connie Wang** —— 客户成功 / 商业化 / To B 产品。本项目由本人用 [Claude Code](https://claude.com/claude-code) 从 0 到 1 设计与实现。
+By **Connie Wang** — AI FDE / AI解决方案 / 客户成功。本项目由本人用 [Claude Code](https://claude.com/claude-code) 从 0 到 1 设计与实现。
