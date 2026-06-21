@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import JourneySteps from "@/components/JourneySteps";
 import { apiFetch } from "@/lib/api";
 import ScoreBar from "@/components/diagnosis/ScoreBar";
 import {
@@ -168,6 +169,7 @@ export default function ReportPage() {
 
   return (
     <PageShell>
+      <JourneySteps current={0} />
       {/* 报告抬头 */}
       <section className="border-b border-slate-200 bg-white">
         <div className="container-page py-12 sm:py-16">

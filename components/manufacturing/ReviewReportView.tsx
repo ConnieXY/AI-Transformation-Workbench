@@ -1,5 +1,8 @@
 import Link from "next/link";
 import type { ReviewReport } from "@/lib/schemas/incident";
+import type { LoopOutcome } from "@/lib/manufacturing/outcome";
+import JourneySteps from "@/components/JourneySteps";
+import OutcomePanel from "@/components/manufacturing/OutcomePanel";
 
 interface IncidentLike {
   product_name?: string | null;
@@ -19,14 +22,17 @@ export default function ReviewReportView({
   incident,
   report,
   createdAt,
+  outcome,
 }: {
   incident: IncidentLike;
   report: ReviewReport;
   createdAt: string | null;
+  outcome?: LoopOutcome | null;
 }) {
   const reportNo = `QA-${incident.batch || "XXXX"}-${fmt(createdAt).replace(/-/g, "")}`;
   return (
     <>
+      <JourneySteps current={2} />
       <section className="border-b border-slate-200 bg-white">
         <div className="container-page py-12 sm:py-16">
           <Link
@@ -56,6 +62,7 @@ export default function ReviewReportView({
       </section>
 
       <div className="container-page space-y-8 py-12 sm:py-16">
+        {outcome && <OutcomePanel outcome={outcome} />}
         <Block index="1" title="异常概况">
           <p className="text-sm leading-relaxed text-ink-700">{report.overview}</p>
         </Block>

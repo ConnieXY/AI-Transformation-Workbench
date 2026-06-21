@@ -3,6 +3,7 @@ import { getUserClient } from "@/lib/supabase/userClient";
 import { runAITask } from "@/lib/ai/task";
 import { incidentReviewTask } from "@/lib/ai/tasks/incidentReview";
 import { transition } from "@/lib/workflow/incident";
+import { computeLoopOutcome } from "@/lib/manufacturing/outcome";
 import type { IncidentAnalysis } from "@/lib/schemas/incident";
 import { FEATURED, featuredIncidentReview } from "@/data/featured";
 
@@ -28,19 +29,27 @@ export async function GET(
     .single();
   if (!incident) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const { data: row } = await supabase
-    .from("review_reports")
-    .select("report, source, created_at")
-    .eq("incident_id", params.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const [{ data: row }, { data: tasks }, { data: events }] = await Promise.all([
+    supabase
+      .from("review_reports")
+      .select("report, source, created_at")
+      .eq("incident_id", params.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from("tasks").select("status").eq("incident_id", params.id),
+    supabase
+      .from("workflow_events")
+      .select("actor, to_state")
+      .eq("incident_id", params.id),
+  ]);
 
   return NextResponse.json({
     incident,
     report: row?.report ?? null,
     source: row?.source ?? null,
     createdAt: row?.created_at ?? null,
+    outcome: computeLoopOutcome(tasks ?? [], events ?? []),
   });
 }
 

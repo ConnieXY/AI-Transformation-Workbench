@@ -10,6 +10,7 @@ import {
   INCIDENT_STORAGE_KEY,
 } from "@/data/manufacturing";
 import type { ReviewReport } from "@/lib/schemas/incident";
+import type { LoopOutcome } from "@/lib/manufacturing/outcome";
 import { analyzeIncident } from "@/lib/incidentAnalyzer";
 import { buildTasks, taskColumns } from "@/lib/taskBuilder";
 
@@ -42,6 +43,7 @@ interface LlmReportPayload {
   incident: { product_name?: string | null; batch?: string | null; incident_type?: string | null };
   report: ReviewReport;
   createdAt: string | null;
+  outcome?: LoopOutcome | null;
 }
 
 export default function ReviewReportPage() {
@@ -80,7 +82,12 @@ export default function ReviewReportPage() {
           }
         }
         if (d?.report) {
-          setLlm({ incident: d.incident, report: d.report, createdAt: d.createdAt });
+          setLlm({
+            incident: d.incident,
+            report: d.report,
+            createdAt: d.createdAt,
+            outcome: d.outcome ?? null,
+          });
         } else {
           loadLocal();
         }
@@ -117,6 +124,7 @@ export default function ReviewReportPage() {
           incident={llm.incident}
           report={llm.report}
           createdAt={llm.createdAt}
+          outcome={llm.outcome}
         />
       </PageShell>
     );

@@ -4,10 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
+import JourneySteps from "@/components/JourneySteps";
 import { apiFetch } from "@/lib/api";
 import ChipMultiSelect from "@/components/solution/ChipMultiSelect";
 import { getSessionId } from "@/lib/sessionId";
 import { SOLUTION_CONTEXT_KEY } from "@/data/diagnosis";
+import {
+  solutionInputFromDiagnosis,
+  type DiagnosisContext,
+} from "@/lib/journey/fromDiagnosis";
 import {
   type SolutionInput,
   SOLUTION_INPUT_KEY,
@@ -29,35 +34,19 @@ export default function SolutionInputPage() {
   const [input, setInput] = useState<SolutionInput>(emptySolutionInput);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [fromDiagnosis, setFromDiagnosis] = useState<string | null>(null);
 
-  // 若存在模块一诊断结果，预填行业、规模与现状系统
+  // 若存在模块一诊断结果，继承诊断结论（成熟度/短板/推荐场景）作为方案输入
   useEffect(() => {
     try {
       const raw = localStorage.getItem(SOLUTION_CONTEXT_KEY);
       if (!raw) return;
-      const ctx = JSON.parse(raw) as {
-        companyInfo?: {
-          industry?: string;
-          companySize?: string;
-          currentSystems?: string;
-          mainPainPoint?: string;
-        };
-      };
-      const info = ctx.companyInfo ?? {};
-      setInput((prev) => ({
-        ...prev,
-        industry:
-          info.industry && industryOptions.includes(info.industry)
-            ? info.industry
-            : prev.industry,
-        companySize:
-          info.companySize &&
-          solutionCompanySizeOptions.includes(info.companySize)
-            ? info.companySize
-            : prev.companySize,
-        currentSystems: info.currentSystems || prev.currentSystems,
-        additionalContext: info.mainPainPoint || prev.additionalContext,
-      }));
+      const ctx = JSON.parse(raw) as DiagnosisContext;
+      if (!ctx?.result || !ctx?.companyInfo) return;
+      setInput(solutionInputFromDiagnosis(ctx));
+      setFromDiagnosis(
+        `${ctx.companyInfo.companyName || "企业"} · 成熟度 ${ctx.result.maturity.level}`,
+      );
     } catch {
       // 忽略解析异常，使用默认值
     }
@@ -129,9 +118,21 @@ export default function SolutionInputPage() {
 
   return (
     <PageShell>
+      <JourneySteps current={1} />
       {/* 抬头 */}
       <section className="border-b border-slate-200 bg-white">
         <div className="container-page py-12 sm:py-14">
+          {fromDiagnosis && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800">
+              <span aria-hidden className="mt-0.5">
+                🔗
+              </span>
+              <p className="leading-relaxed">
+                已继承自<span className="font-semibold">企业诊断</span>（{fromDiagnosis}）：
+                行业、规模、最弱维度对应的目标与痛点、推荐场景已自动带入，可直接生成或微调。
+              </p>
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/solution-builder"

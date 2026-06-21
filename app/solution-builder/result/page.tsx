@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import JourneySteps from "@/components/JourneySteps";
 import GroundedSolutionView from "@/components/solution/GroundedSolutionView";
 import { type SolutionInput, SOLUTION_INPUT_KEY } from "@/data/solution";
 import type { GroundedSolution, SolutionSource } from "@/lib/schemas/solution";
@@ -106,6 +107,7 @@ export default function SolutionResultPage() {
   // 唯一渲染路径：LLM 与规则降级都走 GroundedSolutionView
   return (
     <PageShell>
+      <JourneySteps current={1} />
       <GroundedSolutionView
         input={payload.input}
         grounded={payload.grounded}
