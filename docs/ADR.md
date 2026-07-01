@@ -39,8 +39,8 @@
 ## ADR-0006 · 匿名 session + 优雅降级 + 公网用真实快照展示
 
 - **Context**：公网要展示**真实** AI 能力；但开放的付费 LLM 端点有刷量/注入/成本风险。
-- **Decision**：① 无登录，用浏览器生成的匿名 `session_id` 归属数据；② 未配 LLM/DB key 时回落规则路径；③ **公网不配 LLM key**，改用固化的真实 AI 产物快照（`data/featured/*`）——GET 路由 featured-first，命中固化 id 直接返回，**零成本、确定性、防滥用**地展示真实 grounded 产物 + Trace Viewer。
-- **Consequences**：✅ 公网零配置即可交互式浏览真实产物；✅ 成本/滥用风险为零。⚠️ 公网示例是只读快照而非实时生成（实时路径留本地/带 key 环境）。匿名 session 的 IDOR 已在 [ADR-0010](#adr-0010--匿名登录--rls-数据隔离修复-idor) 用匿名登录 + RLS 修复。
+- **Decision**：① 无登录，用浏览器生成的匿名 `session_id` 归属数据；② 未配 LLM/DB key 时回落规则路径；③ 首版公网不配 LLM key，改用固化的真实 AI 产物快照（`data/featured/*`）——GET 路由 featured-first，命中固化 id 直接返回，**零成本、确定性、防滥用**地展示真实 grounded 产物 + Trace Viewer。
+- **Consequences**：✅ 公网零配置即可交互式浏览真实产物；✅ 首版成本/滥用风险为零。⚠️ 该阶段公网示例是只读快照而非实时生成。后续已在 [ADR-0013](#adr-0013--滥用与成本防护限流--当日成本上限) 演进为 `PUBLIC_AI_ENABLED` 控制的有限额真跑：匿名每日 credits + 全站成本上限 + Trace 实时可观测。匿名 session 的 IDOR 已在 [ADR-0010](#adr-0010--匿名登录--rls-数据隔离修复-idor) 用匿名登录 + RLS 修复。
 
 ## ADR-0007 · Supabase + pgvector；HNSW 而非 ivfflat
 
@@ -57,7 +57,7 @@
 | ~~鉴权/数据隔离~~ | ~~匿名 session，GET 按 id 可读（IDOR）~~ | 已在 [ADR-0010](#adr-0010--匿名登录--rls-数据隔离修复-idor) 完成 |
 | Trace 形态 | 平表，retrieve 与 generate 无父子关联 | span 树 + correlation id（OTel 风格） |
 | 测试 / CI | tsc + 纯函数单测 + **录制式 eval 回放**（无密钥）+ **GitHub Actions 自动跑**（[ADR-0012](#adr-0012--接入-ci自动门禁) / [ADR-0014](#adr-0014--录制式-eval-进-ci离线无密钥的评测门禁)） | API 集成测试；在线 eval 重录做真实质量校准 |
-| 公网实时性 | 真实产物为固化快照 | 带限流/鉴权的"在线真跑"环境 |
+| ~~公网实时性~~ | ~~真实产物为固化快照~~ | 已在 [ADR-0013](#adr-0013--滥用与成本防护限流--当日成本上限) 完成：`PUBLIC_AI_ENABLED=true` 时有限额在线真跑 |
 | 流式 | 同步等待 5–9s | 流式输出 / 后台任务 |
 
 > ~~模块抽象重复~~ 已在 [ADR-0009](#adr-0009--统一-aitask-抽象合并规则llm-双路径) 完成。
@@ -93,11 +93,11 @@
 
 - **Context**：[ADR-0010](#adr-0010--匿名登录--rls-数据隔离修复-idor) 用匿名登录换来了"零门槛即用"，但同一枚硬币的另一面是——**任何人都能无限领取身份**；RLS 只隔离了"数据归谁"，并不限制"花了多少钱"。对一个会调用付费 LLM 的系统，这意味着一把没上锁的油门：突发刷量能拖垮服务、烧光额度。这正是把"能用的 demo"变成"敢挂密钥上线"的最后一道缺口。
 - **Decision**：补**两道互补的闸**，并刻意复用既有能力、延续既有哲学：
-  1. **公网真跑总开关**（`PUBLIC_AI_ENABLED`）：默认关闭。即使部署了 LLM/Embedding key，只要开关不是 `true`，`runAITask` 就不会发起 RAG/LLM 付费调用，沿用规则降级 / featured 快照模式。
+  1. **公网真跑总开关**（`PUBLIC_AI_ENABLED`）：默认关闭；当前线上显式开启为 `true`。即使部署了 LLM/Embedding key，只要开关不是 `true`，`runAITask` 就不会发起 RAG/LLM 付费调用，沿用规则降级 / featured 快照模式。
   2. **突发用限流挡**（`lib/ratelimit.ts`）：按"主体"（匿名 JWT 的 `sub`，回退 IP）做每分钟固定窗口限流，超限返回 `429 + Retry-After`，加在四个调用 LLM 的写路由上。窗口对真人/eval 宽松、对刷量收紧。
   3. **体验用 credits 控**（`public_ai_usage` + `consume_public_ai_credits`）：每个匿名主体每日默认 15 credits。四个产品 AI 任务按权重扣减：诊断洞察 1、方案生成 3、异常根因分析 3、复盘报告 2；调试检索端点 `rag.search` 消耗 1。扣减在 DB RPC 内原子完成，跨 serverless 实例可靠；额度不足时不报错，降级为规则路径。
   4. **钱用当日成本上限兜底**（`lib/llm/budget.ts`）：每次走付费模型前，汇总当日花费与上限比较——而**花费数据正好复用可观测面的 `llm_traces.cost_usd`**（[ADR-0005](#adr-0005--可观测--可评测llm_traces--离线-eval--跨模型-llm-as-judge) 记录成本的副产品，此处直接成了预算闸）。超限不报错，而是**当作"LLM 不可用"降级为规则路径**——这与全应用一致的[优雅降级哲学](#adr-0006--匿名-session--优雅降级--公网用真实快照展示)同源：缺资源就退一步，不崩。
-- **Consequences**：✅ 「匿名 auth」与「API key 被刷爆」之间终于有了多层闸；✅ credits 与成本上限都是 DB 级硬额度（跨实例可靠），限流是进程内的快速第一道（突发抑制）；✅ 超限体验是"换规则结果"而非"报错"，对用户无感、对钱包有底；✅ embedding trace 现在写入 tokens 与估算成本，Trace Viewer 的总成本覆盖 LLM + Embedding。⚠️ 限流为**进程内**（serverless 多实例下是"每实例"，硬额度由 credits / 成本上限承担）；成本统计有 ~30s 缓存，可能小幅超出后才生效（安全网而非精确计费）。
+- **Consequences**：✅ 「匿名 auth」与「API key 被刷爆」之间终于有了多层闸；✅ 公网从“只读快照”升级为“有限额真实 LLM + RAG 体验”；✅ credits 与成本上限都是 DB 级硬额度（跨实例可靠），限流是进程内的快速第一道（突发抑制）；✅ 超限体验是"换规则结果"而非"报错"，对用户无感、对钱包有底；✅ embedding trace 现在写入 tokens 与估算成本，Trace Viewer 的总成本覆盖 LLM + Embedding。⚠️ 限流为**进程内**（serverless 多实例下是"每实例"，硬额度由 credits / 成本上限承担）；成本统计有 ~30s 缓存，可能小幅超出后才生效（安全网而非精确计费）。
 
 ## ADR-0014 · 录制式 eval 进 CI（离线·无密钥的评测门禁）
 

@@ -9,7 +9,7 @@
 1. **结构化**：模糊诉求 → 结构化诊断 / 方案 / 根因（强制 schema 校验）。
 2. **Grounded**：方案与根因基于知识库 RAG，**带可核验的引用**，无依据时诚实弃权。
 3. **嵌入业务**：把 AI 塞进制造业质量异常的真实闭环（状态机 + human-in-the-loop）。
-4. **Production-minded**：可观测（trace）、可评测（eval）、可测试（单测 + CI）、优雅降级、密钥隔离、可维护。
+4. **Production-minded**：公网有限额真跑、可观测（trace）、可评测（eval）、可测试（单测 + CI）、优雅降级、密钥隔离、可维护。
 
 ## 2. 技术栈
 
@@ -18,7 +18,7 @@
 | 前端 | Next.js 14（App Router）· React 18 · TypeScript · Tailwind |
 | 后端 | Next.js Route Handlers（`/api/*`，Node runtime） |
 | 数据库 | Supabase（Postgres）+ **pgvector**（embedding 检索） |
-| LLM | OpenAI 兼容 provider 抽象（默认 DeepSeek `deepseek-chat`，可切 Qwen/OpenAI） |
+| LLM | OpenAI 兼容 provider 抽象（当前线上 DeepSeek `deepseek-v4-flash`，可切 Qwen/OpenAI） |
 | Embedding | 阿里百炼 `text-embedding-v4`（1536 维） |
 | 校验 | Zod（结构化输出 schema 即真值来源） |
 | 部署 | Vercel · 域名 aiworkbench.wowonderwhy.com |
@@ -74,7 +74,8 @@ flowchart TD
 - **可观测性**：`/traces` 读 `llm_traces`，展示成本/延迟(p50/p95)/结构化输出/RAG 引用/错误。
 - **可评测**：在线 `npm run eval` 跑黄金集出 scorecard；**录制式 eval**（`npm run eval:record` 录、`eval:ci` 回放）把响应与裁判结果固化为磁带，使评测能**无密钥、确定性地进 CI**（[ADR-0014](ADR.md#adr-0014--录制式-eval-进-ci离线无密钥的评测门禁)）。
 - **可测试 / CI**：纯逻辑单测 `npm test`（无密钥），GitHub Actions 每次 push/PR 自动跑 **tsc + test + eval 回放 + build**（[ADR-0012](ADR.md#adr-0012--接入-ci自动门禁)）。
-- **优雅降级**：未配 LLM/DB key 或 `PUBLIC_AI_ENABLED=false` 时回落规则路径；公网可用**固化的真实 AI 快照**（`data/featured/*`）展示真实产物，零成本零滥用。
+- **公网真跑**：当前线上开启 `PUBLIC_AI_ENABLED=true`，访客可在每日 credits 内实时调用 LLM + RAG；`/traces` 实时展示 LLM / Embedding 的 tokens、成本、延迟与状态。
+- **优雅降级**：未配 LLM/DB key、`PUBLIC_AI_ENABLED=false`、匿名 credits 不足或全站成本超限时回落规则路径；公网仍保留**固化的真实 AI 快照**（`data/featured/*`）作为零成本、确定性的展示入口。
 - **密钥安全**：客户端不直连 DB/LLM；service_role 与 LLM key 仅服务端。
 - **滥用 / 成本防护**：`PUBLIC_AI_ENABLED` 作为公网真跑总开关；按主体（匿名 JWT 的 sub，回退 IP）限流（`lib/ratelimit.ts`，超限 429）；匿名主体每日 credits（默认 15，`public_ai_usage` + `consume_public_ai_credits` 原子扣减）；**当日 LLM + Embedding 成本上限**（`lib/llm/budget.ts`）直接复用 `llm_traces.cost_usd` 做预算闸，超限即按"LLM 不可用"降级为规则路径（[ADR-0013](ADR.md#adr-0013--滥用与成本防护限流--当日成本上限)）。
 

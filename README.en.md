@@ -6,6 +6,8 @@
 
 🔗 **Live demo**: <https://aiworkbench.wowonderwhy.com>
 
+The public site now supports **limited live LLM + RAG runs**: each anonymous visitor gets 15 credits per day, with a site-wide daily LLM + Embedding cost cap of $1. When credits or budget are exhausted, the app gracefully falls back to deterministic rule-based outputs. `/traces` shows live calls, tokens, cost, and latency.
+
 Built around a **Diagnose → Design → Deliver** spine that connects three modules, with a **manufacturing quality-incident closed loop** as the fully worked example. The scenarios come from real pain points of manufacturing clients (automotive electronics / semiconductor).
 
 ```mermaid
@@ -20,9 +22,9 @@ flowchart TB
 
 ---
 
-## See it in one minute (real AI outputs)
+## See it in one minute (live runs + real snapshots)
 
-The public "**View real AI examples**" entry shows frozen artifacts produced by real LLM + RAG runs (zero keys, zero cost):
+Public forms can call LLM + RAG live within the quota. The public "**View real AI examples**" entries also keep frozen artifacts produced by real LLM + RAG runs (zero cost, deterministic display):
 
 | Module | Direct link |
 |---|---|
@@ -39,7 +41,7 @@ The public "**View real AI examples**" entry shows frozen artifacts produced by 
 - **One transformation journey**: the diagnosis result feeds the solution, the solution lands in the operational loop, and the loop reports **outcome metrics derived from real data** (task closure rate / AI-automation share / auditable steps).
 - **Observability**: every LLM/embedding call is written to `llm_traces`; `/traces` shows cost / latency (p50·p95) / structured output / RAG citations / errors.
 - **Evaluation + CI**: `npm run eval` runs a golden set (schema / citations / **faithfulness via LLM-as-judge** / recall); a **record/replay cassette** lets the eval run as a **keyless CI gate** (`tsc + unit tests + eval replay + build`).
-- **Engineering base**: data isolation (anonymous sign-in + Postgres RLS), abuse/cost guards (rate limit + daily cost cap), provider abstraction (no vendor lock-in), graceful degradation, server-only secrets, real-output snapshots for the public site.
+- **Engineering base**: data isolation (anonymous sign-in + Postgres RLS), abuse/cost guards (public-AI switch + anonymous daily credits + daily cost cap + rate limit), provider abstraction (no vendor lock-in), graceful degradation, server-only secrets, limited public live runs + real-output snapshots.
 
 ## Key results
 
@@ -85,11 +87,11 @@ npm test                       # pure-function unit tests (no keys)
 npm run eval:ci                # recorded-eval replay (no keys, offline)
 ```
 
-> Without keys it degrades to the rule-based path automatically; the public site runs in exactly this mode plus real-AI snapshots (no paid calls are triggered).
+> Public live runs are controlled by `PUBLIC_AI_ENABLED`. The current production site has it enabled, with 15 credits per anonymous identity per day and a $1 daily site-wide LLM + Embedding cost cap. Set it to `false` and redeploy to return to rule-based fallback + real snapshot mode.
 
 ## Status & boundaries (honest)
 
-**Demo / preview build.** Known trade-offs and roadmap are in [ADR-0008](docs/ADR.md#adr-0008--已知缺口与路线图诚实边界): the public site serves read-only real snapshots; traces are a flat table. The engineering base is in place: data isolation (anonymous sign-in + Postgres RLS fixing IDOR, [ADR-0010](docs/ADR.md#adr-0010--匿名登录--rls-数据隔离修复-idor)), abuse/cost guards (rate limit + daily LLM cost cap with graceful degradation, [ADR-0013](docs/ADR.md#adr-0013--滥用与成本防护限流--当日成本上限)), and a keyless CI gate (tsc + unit tests + **recorded-eval replay**, [ADR-0012](docs/ADR.md#adr-0012--接入-ci自动门禁) / [ADR-0014](docs/ADR.md#adr-0014--录制式-eval-进-ci离线无密钥的评测门禁)). Still to come: real accounts (anonymous identity is browser-bound), org-level multi-tenancy, API integration tests, span-tree traces.
+**Demo / preview build.** Known trade-offs and roadmap are in [ADR-0008](docs/ADR.md#adr-0008--已知缺口与路线图诚实边界): the public site now supports quota-limited live runs, while `PUBLIC_AI_ENABLED=false` can switch it back to real snapshots + rule-based fallback; traces are still a flat table. The engineering base is in place: data isolation (anonymous sign-in + Postgres RLS fixing IDOR, [ADR-0010](docs/ADR.md#adr-0010--匿名登录--rls-数据隔离修复-idor)), abuse/cost guards (public-AI switch + anonymous daily credits + daily LLM/Embedding cost cap + rate limit, with graceful degradation, [ADR-0013](docs/ADR.md#adr-0013--滥用与成本防护限流--当日成本上限)), and a keyless CI gate (tsc + unit tests + **recorded-eval replay**, [ADR-0012](docs/ADR.md#adr-0012--接入-ci自动门禁) / [ADR-0014](docs/ADR.md#adr-0014--录制式-eval-进-ci离线无密钥的评测门禁)). Still to come: real accounts (anonymous identity is browser-bound), org-level multi-tenancy, API integration tests, span-tree traces.
 
 ## Author
 

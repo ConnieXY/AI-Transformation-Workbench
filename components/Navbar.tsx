@@ -28,9 +28,6 @@ export default function Navbar() {
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <Logo />
-          <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-ink-500 sm:inline">
-            Demo
-          </span>
         </div>
 
         <nav className="hidden items-center gap-1 md:flex">
