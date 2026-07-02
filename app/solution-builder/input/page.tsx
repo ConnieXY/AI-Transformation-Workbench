@@ -143,29 +143,31 @@ export default function SolutionInputPage() {
               </div>
             </div>
           )}
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/solution-builder"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition-colors hover:text-ink-900"
             >
               <span aria-hidden>←</span> 返回方案生成器
             </Link>
-            <button
-              type="button"
-              onClick={fillSample}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100"
-            >
-              <span aria-hidden>✨</span> 填入示例
-            </button>
-            {fromDiagnosis && (
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <button
                 type="button"
-                onClick={clearSolutionInput}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-ink-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                onClick={fillSample}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100"
               >
-                清空重填
+                <span aria-hidden>✨</span> 填入示例
               </button>
-            )}
+              {fromDiagnosis && (
+                <button
+                  type="button"
+                  onClick={clearSolutionInput}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-ink-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                >
+                  清空重填
+                </button>
+              )}
+            </div>
           </div>
           <h1 className="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
             输入行业与客户信息
