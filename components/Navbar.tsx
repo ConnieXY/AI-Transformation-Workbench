@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
+import { useLanguage } from "./i18n/LanguageProvider";
 
 /** 全站统一的顶部导航入口。 */
 const navLinks = [
@@ -24,6 +25,7 @@ function isActive(pathname: string, href: string): boolean {
 export default function Navbar() {
   const pathname = usePathname() || "/";
   const [menuOpen, setMenuOpen] = useState(false);
+  const { locale, toggleLocale } = useLanguage();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -67,36 +69,59 @@ export default function Navbar() {
           })}
         </nav>
 
-        <button
-          type="button"
-          aria-label={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-navigation"
-          title={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
-          onClick={() => setMenuOpen((open) => !open)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 md:hidden"
-        >
-          <span className="sr-only">
-            {menuOpen ? "关闭导航菜单" : "打开导航菜单"}
-          </span>
-          <span aria-hidden className="relative h-4 w-5">
-            <span
-              className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform ${
-                menuOpen ? "translate-y-[7px] rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition-opacity ${
-                menuOpen ? "opacity-0" : "opacity-100"
-              }`}
-            />
-            <span
-              className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-transform ${
-                menuOpen ? "-translate-y-[7px] -rotate-45" : ""
-              }`}
-            />
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleLocale}
+            aria-label={
+              locale === "zh" ? "切换为英文" : "Switch to Chinese"
+            }
+            title={locale === "zh" ? "切换为英文" : "Switch to Chinese"}
+            data-i18n-ignore="true"
+            className="inline-flex h-9 min-w-[4.5rem] items-center justify-center gap-1 rounded-full border border-slate-200 bg-white px-3 text-sm font-semibold text-ink-600 shadow-sm transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+          >
+            <span className={locale === "zh" ? "text-ink-900" : "text-ink-300"}>
+              中
+            </span>
+            <span aria-hidden className="text-ink-300">
+              /
+            </span>
+            <span className={locale === "en" ? "text-ink-900" : "text-ink-300"}>
+              EN
+            </span>
+          </button>
+
+          <button
+            type="button"
+            aria-label={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            title={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
+            onClick={() => setMenuOpen((open) => !open)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 md:hidden"
+          >
+            <span className="sr-only">
+              {menuOpen ? "关闭导航菜单" : "打开导航菜单"}
+            </span>
+            <span aria-hidden className="relative h-4 w-5">
+              <span
+                className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform ${
+                  menuOpen ? "translate-y-[7px] rotate-45" : ""
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition-opacity ${
+                  menuOpen ? "opacity-0" : "opacity-100"
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-transform ${
+                  menuOpen ? "-translate-y-[7px] -rotate-45" : ""
+                }`}
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
       <nav

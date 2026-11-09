@@ -4,6 +4,7 @@ import { enforceRateLimit, identityFromRequest } from "@/lib/ratelimit";
 import { runAITask } from "@/lib/ai/task";
 import { incidentAnalysisTask } from "@/lib/ai/tasks/incidentAnalysis";
 import { transition } from "@/lib/workflow/incident";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +38,7 @@ export async function POST(
         sessionId: incident.session_id,
         entityId: incident.id,
         quotaKey: identityFromRequest(req),
+        locale: getRequestLocale(req),
       },
     );
 

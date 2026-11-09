@@ -7,6 +7,7 @@ import { enforceRateLimit, identityFromRequest } from "@/lib/ratelimit";
 import { canUsePublicAI } from "@/lib/env";
 import { runAITask } from "@/lib/ai/task";
 import { diagnosisInsightTask } from "@/lib/ai/tasks/diagnosisInsight";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,6 +107,7 @@ export async function POST(req: Request) {
           sessionId,
           entityId: assessment.id,
           quotaKey: identityFromRequest(req),
+          locale: getRequestLocale(req),
         },
       );
       await supabase

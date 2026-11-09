@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import VercelAnalytics from "@/components/VercelAnalytics";
+import LanguageProvider from "@/components/i18n/LanguageProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,8 +40,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className={inter.variable}>
       <body>
-        {children}
-        <VercelAnalytics />
+        <LanguageProvider>
+          {children}
+          <VercelAnalytics />
+        </LanguageProvider>
       </body>
     </html>
   );

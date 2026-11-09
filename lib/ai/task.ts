@@ -7,6 +7,7 @@ import { isOverDailyBudget } from "@/lib/llm/budget";
 import { consumePublicAICredits } from "@/lib/ai/credits";
 import type { SolutionSource } from "@/lib/schemas/solution";
 import type { TraceEntityType } from "@/lib/llm/types";
+import type { Locale } from "@/lib/i18n";
 
 export class LLMUnavailableError extends Error {}
 
@@ -14,6 +15,7 @@ export interface AITaskContext {
   sessionId?: string;
   entityId?: string | null;
   quotaKey?: string | null;
+  locale?: Locale;
 }
 
 /** RAG 检索配置（可选；无此项的任务不检索） */
@@ -120,9 +122,13 @@ export async function runAITask<I, O>(
 
   try {
     const { system, user } = task.buildPrompt(input, sources, chunkContents);
+    const localizedSystem =
+      ctx.locale === "en"
+        ? `${system}\n\nWrite all user-facing free-text fields in concise, professional English for B2B decision-makers. Preserve any fixed enum values required by the JSON Schema exactly as defined.`
+        : system;
     const generated = (await runStructured({
       schema: task.schema,
-      system,
+      system: localizedSystem,
       user,
       step: task.step,
       entityType: task.entityType,

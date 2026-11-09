@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateValue } from "@/lib/i18n";
 
 interface Trace {
   id: string;
@@ -26,9 +28,10 @@ interface Trace {
 }
 
 function Json({ value }: { value: unknown }) {
+  const { locale } = useLanguage();
   return (
     <pre className="overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-ink-700">
-      {JSON.stringify(value, null, 2)}
+      {JSON.stringify(translateValue(value, locale), null, 2)}
     </pre>
   );
 }

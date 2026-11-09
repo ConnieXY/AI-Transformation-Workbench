@@ -1,6 +1,7 @@
 "use client";
 
 import { ensureAuthToken } from "@/lib/supabase/client";
+import { isLocale, LOCALE_STORAGE_KEY } from "@/lib/i18n";
 
 /**
  * 业务 API 调用统一入口：自动匿名登录并带上 Authorization: Bearer <jwt>，
@@ -14,5 +15,7 @@ export async function apiFetch(
   const token = await ensureAuthToken();
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
+  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+  headers.set("x-ui-language", isLocale(storedLocale) ? storedLocale : "zh");
   return fetch(input, { ...init, headers });
 }

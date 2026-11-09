@@ -7,6 +7,7 @@ import { transition } from "@/lib/workflow/incident";
 import { computeLoopOutcome } from "@/lib/manufacturing/outcome";
 import type { IncidentAnalysis } from "@/lib/schemas/incident";
 import { FEATURED, featuredIncidentReview } from "@/data/featured";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -102,6 +103,7 @@ export async function POST(
         sessionId: incident.session_id,
         entityId: incident.id,
         quotaKey: identityFromRequest(req),
+        locale: getRequestLocale(req),
       },
     );
 

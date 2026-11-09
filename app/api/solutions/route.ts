@@ -4,6 +4,7 @@ import { getUserClient } from "@/lib/supabase/userClient";
 import { enforceRateLimit, identityFromRequest } from "@/lib/ratelimit";
 import { runAITask } from "@/lib/ai/task";
 import { solutionTask } from "@/lib/ai/tasks/solution";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,7 +60,12 @@ export async function POST(req: Request) {
   const { output: grounded, sources, source } = await runAITask(
     solutionTask,
     input,
-    { sessionId, entityId: id, quotaKey: identityFromRequest(req) },
+    {
+      sessionId,
+      entityId: id,
+      quotaKey: identityFromRequest(req),
+      locale: getRequestLocale(req),
+    },
   );
 
   if (supabase && id) {
