@@ -11,7 +11,7 @@ export default function Footer() {
             ·
           </span>
           <span>
-            By <span className="font-medium text-ink-700">Connie Wang</span>
+            By Connie Wang
           </span>
         </p>
         <p className="text-ink-300">

@@ -10,7 +10,7 @@ export default function Logo() {
       >
         AI
       </span>
-      <span className="text-[15px] font-semibold tracking-tight text-ink-900">
+      <span className="hidden text-[15px] font-semibold tracking-tight text-ink-900 sm:inline">
         企业数智化转型工作台
       </span>
     </Link>

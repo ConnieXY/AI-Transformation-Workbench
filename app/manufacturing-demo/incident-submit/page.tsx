@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import { apiFetch } from "@/lib/api";
 import { getSessionId } from "@/lib/sessionId";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import {
   type IncidentInput,
   INCIDENT_STORAGE_KEY,
   emptyIncident,
   incidentTypeOptions,
   sampleIncident,
+  sampleIncidentEn,
   severityOptions,
 } from "@/data/manufacturing";
 
@@ -30,6 +32,7 @@ function nowLocal(): string {
 
 export default function IncidentSubmitPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
   const [incident, setIncident] = useState<IncidentInput>(emptyIncident);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -42,7 +45,8 @@ export default function IncidentSubmitPage() {
   }
 
   function fillSample() {
-    setIncident({ ...sampleIncident, discoveredAt: nowLocal() });
+    const sample = locale === "en" ? sampleIncidentEn : sampleIncident;
+    setIncident({ ...sample, discoveredAt: nowLocal() });
     setError(null);
   }
 

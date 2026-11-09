@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { translateText, translateValue } from "@/lib/i18n";
+import { sampleDiagnosisSubmissionEn } from "@/data/diagnosis";
+import { sampleSolutionInputEn } from "@/data/solution";
+import { sampleIncidentEn } from "@/data/manufacturing";
 
 describe("UI localization", () => {
   it("translates exact UI copy and preserves surrounding whitespace", () => {
@@ -24,5 +27,24 @@ describe("UI localization", () => {
 
   it("leaves unknown and user-provided text untouched", () => {
     assert.equal(translateText("用户自定义内容", "en"), "用户自定义内容");
+  });
+
+  it("uses English free-text values for every fill-example flow", () => {
+    const visibleEnglishSampleValues = [
+      sampleDiagnosisSubmissionEn.companyInfo.companyName,
+      sampleDiagnosisSubmissionEn.companyInfo.currentSystems,
+      sampleDiagnosisSubmissionEn.companyInfo.mainPainPoint,
+      sampleSolutionInputEn.currentSystems,
+      sampleSolutionInputEn.additionalContext,
+      sampleIncidentEn.productName,
+      sampleIncidentEn.productionLine,
+      sampleIncidentEn.process,
+      sampleIncidentEn.incidentDescription,
+      sampleIncidentEn.reporter,
+    ];
+
+    for (const value of visibleEnglishSampleValues) {
+      assert.equal(/[\u3400-\u9fff]/.test(value), false, value);
+    }
   });
 });

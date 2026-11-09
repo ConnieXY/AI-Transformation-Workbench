@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import { apiFetch } from "@/lib/api";
 
 interface TraceRow {
   id: string;
@@ -43,9 +44,12 @@ export default function TracesPage() {
 
   useEffect(() => {
     setMounted(true);
-    fetch("/api/traces?limit=200")
+    apiFetch("/api/traces?limit=200")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("unavailable"))))
       .then((d) => {
+        if (!d?.metrics || !Array.isArray(d?.traces)) {
+          throw new Error("invalid trace response");
+        }
         setMetrics(d.metrics);
         setTraces(d.traces);
       })

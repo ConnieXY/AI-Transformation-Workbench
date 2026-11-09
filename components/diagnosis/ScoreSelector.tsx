@@ -1,6 +1,7 @@
 "use client";
 
 import { scoreScale } from "@/data/diagnosis";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface ScoreSelectorProps {
   value: number | null;
@@ -15,6 +16,8 @@ export default function ScoreSelector({
   onChange,
   label,
 }: ScoreSelectorProps) {
+  const { t } = useLanguage();
+
   return (
     <div
       role="radiogroup"
@@ -37,7 +40,7 @@ export default function ScoreSelector({
             }`}
           >
             <span className="text-base font-semibold">{score.value}</span>
-            <span className="text-xs">{score.label}</span>
+            <span className="text-xs">{t(score.label)}</span>
           </button>
         );
       })}

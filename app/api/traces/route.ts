@@ -14,14 +14,23 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "100"), 500);
 
-  const { data, error } = await supabase
-    .from("llm_traces")
-    .select(
-      "id, step, provider, model, operation, status, input_tokens, output_tokens, cost_usd, latency_ms, entity_type, entity_id, created_at",
-    )
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  let data;
+  try {
+    const result = await supabase
+      .from("llm_traces")
+      .select(
+        "id, step, provider, model, operation, status, input_tokens, output_tokens, cost_usd, latency_ms, entity_type, entity_id, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    // Trace Viewer is a public portfolio surface. If the live telemetry store is
+    // temporarily unreachable, keep the approved public snapshot available.
+    if (result.error) return NextResponse.json(featuredTraces);
+    data = result.data;
+  } catch {
+    return NextResponse.json(featuredTraces);
+  }
 
   const rows = data ?? [];
   const latencies = rows

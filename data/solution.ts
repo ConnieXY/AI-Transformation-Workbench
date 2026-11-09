@@ -111,6 +111,14 @@ export const sampleSolutionInput: SolutionInput = {
     "希望优先在质量与协同场景见效，并沉淀可复用的数据与平台能力。",
 };
 
+/** English-facing sample. Canonical option values remain unchanged for form logic and APIs. */
+export const sampleSolutionInputEn: SolutionInput = {
+  ...sampleSolutionInput,
+  currentSystems: "ERP, MES",
+  additionalContext:
+    "Prioritize early results in quality and collaboration while building reusable data and platform capabilities.",
+};
+
 /** localStorage 存储键：输入页写入、结果页读取共用 */
 export const SOLUTION_INPUT_KEY = "solution:input";
 

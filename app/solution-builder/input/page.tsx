@@ -7,6 +7,7 @@ import PageShell from "@/components/PageShell";
 import JourneySteps from "@/components/JourneySteps";
 import { apiFetch } from "@/lib/api";
 import ChipMultiSelect from "@/components/solution/ChipMultiSelect";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { getSessionId } from "@/lib/sessionId";
 import { SOLUTION_CONTEXT_KEY } from "@/data/diagnosis";
 import {
@@ -21,6 +22,7 @@ import {
   industryOptions,
   painPointsByIndustry,
   sampleSolutionInput,
+  sampleSolutionInputEn,
   solutionCompanySizeOptions,
   targetRoleOptions,
 } from "@/data/solution";
@@ -31,6 +33,7 @@ const fieldBase =
 
 export default function SolutionInputPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
   const [input, setInput] = useState<SolutionInput>(emptySolutionInput);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -86,7 +89,7 @@ export default function SolutionInputPage() {
   }
 
   function fillSample() {
-    setInput(sampleSolutionInput);
+    setInput(locale === "en" ? sampleSolutionInputEn : sampleSolutionInput);
     setError(null);
   }
 

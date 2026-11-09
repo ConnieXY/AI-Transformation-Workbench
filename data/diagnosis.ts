@@ -300,3 +300,15 @@ export const sampleDiagnosisSubmission: DiagnosisSubmission = {
   },
   submittedAt: "2026-06-16T09:30:00.000Z",
 };
+
+/** English-facing sample. Select values stay canonical so existing scoring/API logic is unchanged. */
+export const sampleDiagnosisSubmissionEn: DiagnosisSubmission = {
+  ...sampleDiagnosisSubmission,
+  companyInfo: {
+    ...sampleDiagnosisSubmission.companyInfo,
+    companyName: "Demo Manufacturing Technology Co., Ltd.",
+    currentSystems: "ERP, MES, WeCom",
+    mainPainPoint:
+      "Quality incident response is slow, cross-functional data is disconnected, and management lacks a real-time operational view.",
+  },
+};

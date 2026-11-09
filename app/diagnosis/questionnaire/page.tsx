@@ -7,6 +7,7 @@ import PageShell from "@/components/PageShell";
 import { apiFetch } from "@/lib/api";
 import CompanyInfoForm from "@/components/diagnosis/CompanyInfoForm";
 import QuestionItem from "@/components/diagnosis/QuestionItem";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { getSessionId } from "@/lib/sessionId";
 import {
   type Answers,
@@ -17,6 +18,7 @@ import {
   emptyCompanyInfo,
   questions,
   sampleDiagnosisSubmission,
+  sampleDiagnosisSubmissionEn,
 } from "@/data/diagnosis";
 
 /** 按维度分组问题，并保留其在 questions 数组中的全局下标。 */
@@ -29,6 +31,7 @@ const questionsByDimension = dimensions.map((dimension) => ({
 
 export default function QuestionnairePage() {
   const router = useRouter();
+  const { locale } = useLanguage();
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(emptyCompanyInfo);
   const [answers, setAnswers] = useState<Answers>({});
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +54,10 @@ export default function QuestionnairePage() {
   }
 
   function fillSample() {
-    setCompanyInfo(sampleDiagnosisSubmission.companyInfo);
-    setAnswers(sampleDiagnosisSubmission.answers);
+    const sample =
+      locale === "en" ? sampleDiagnosisSubmissionEn : sampleDiagnosisSubmission;
+    setCompanyInfo(sample.companyInfo);
+    setAnswers(sample.answers);
     setError(null);
   }
 

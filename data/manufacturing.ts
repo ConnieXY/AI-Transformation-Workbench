@@ -109,5 +109,16 @@ export const sampleIncident: IncidentInput = {
   reporter: "王磊",
 };
 
+/** English-facing sample. Canonical select values remain unchanged for form logic and APIs. */
+export const sampleIncidentEn: IncidentInput = {
+  ...sampleIncident,
+  productName: "Smart Speaker",
+  productionLine: "Line A",
+  process: "Assembly",
+  incidentDescription:
+    "Today, 30 smart-speaker housings with scratches were found during assembly on Line A, all from batch B202406. A new batch of housing material from a replacement supplier was introduced yesterday, so the incoming material or handling process may be related.",
+  reporter: "Lei Wang",
+};
+
 /** localStorage 存储键：上报页写入、分析页读取共用 */
 export const INCIDENT_STORAGE_KEY = "manufacturing:incident";

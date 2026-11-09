@@ -1,6 +1,7 @@
 "use client";
 
 import type { Question } from "@/data/diagnosis";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import ScoreSelector from "./ScoreSelector";
 
 interface QuestionItemProps {
@@ -18,6 +19,9 @@ export default function QuestionItem({
   value,
   onChange,
 }: QuestionItemProps) {
+  const { t } = useLanguage();
+  const localizedQuestion = t(question.question);
+
   return (
     <div className="border-t border-slate-100 py-5 first:border-t-0 first:pt-0">
       <div className="flex gap-3">
@@ -26,10 +30,10 @@ export default function QuestionItem({
         </span>
         <div className="min-w-0">
           <p className="text-[15px] font-medium text-ink-900">
-            {question.question}
+            {localizedQuestion}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-ink-500">
-            {question.description}
+            {t(question.description)}
           </p>
         </div>
       </div>
@@ -38,7 +42,7 @@ export default function QuestionItem({
         <ScoreSelector
           value={value}
           onChange={onChange}
-          label={question.question}
+          label={localizedQuestion}
         />
       </div>
     </div>

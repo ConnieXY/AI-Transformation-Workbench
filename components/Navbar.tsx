@@ -44,12 +44,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-6">
+        <div className="flex flex-none items-center gap-2.5">
           <Logo />
         </div>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden flex-1 grid-cols-6 items-center gap-1 xl:grid">
           {navLinks.map((link) => {
             const active = isActive(pathname, link.href);
             return (
@@ -57,7 +57,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                className={`whitespace-nowrap rounded-md px-2 py-2 text-center text-xs font-medium transition-colors ${
                   active
                     ? "bg-slate-100 text-ink-900"
                     : "text-ink-500 hover:bg-slate-100 hover:text-ink-900"
@@ -98,7 +98,7 @@ export default function Navbar() {
             aria-controls="mobile-navigation"
             title={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
             onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 xl:hidden"
           >
             <span className="sr-only">
               {menuOpen ? "关闭导航菜单" : "打开导航菜单"}
@@ -126,7 +126,7 @@ export default function Navbar() {
 
       <nav
         id="mobile-navigation"
-        className={`border-t border-slate-200/80 bg-white md:hidden ${
+        className={`border-t border-slate-200/80 bg-white xl:hidden ${
           menuOpen ? "block" : "hidden"
         }`}
       >
