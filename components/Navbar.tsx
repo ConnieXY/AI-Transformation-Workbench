@@ -7,13 +7,21 @@ import Logo from "./Logo";
 import { useLanguage } from "./i18n/LanguageProvider";
 
 /** 全站统一的顶部导航入口。 */
-const navLinks = [
+const zhNavLinks = [
   { href: "/", label: "首页" },
   { href: "/diagnosis", label: "企业诊断" },
   { href: "/solution-builder", label: "行业方案" },
   { href: "/manufacturing-demo", label: "制造业 Demo" },
   { href: "/traces", label: "Trace" },
   { href: "/about", label: "项目说明" },
+];
+
+const enNavLinks = [
+  { href: "/diagnosis", label: "Diagnosis" },
+  { href: "/solution-builder", label: "Solutions" },
+  { href: "/manufacturing-demo", label: "Demo" },
+  { href: "/traces", label: "Trace" },
+  { href: "/about", label: "Overview" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -26,6 +34,7 @@ export default function Navbar() {
   const pathname = usePathname() || "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const { locale, toggleLocale } = useLanguage();
+  const navLinks = locale === "en" ? enNavLinks : zhNavLinks;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -49,7 +58,10 @@ export default function Navbar() {
           <Logo />
         </div>
 
-        <nav className="hidden flex-1 grid-cols-6 items-center gap-1 xl:grid">
+        <nav
+          data-i18n-ignore="true"
+          className="ml-auto hidden items-center gap-1.5 xl:flex"
+        >
           {navLinks.map((link) => {
             const active = isActive(pathname, link.href);
             return (
@@ -57,7 +69,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`whitespace-nowrap rounded-md px-2 py-2 text-center text-xs font-medium transition-colors ${
+                className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   active
                     ? "bg-slate-100 text-ink-900"
                     : "text-ink-500 hover:bg-slate-100 hover:text-ink-900"
@@ -126,6 +138,7 @@ export default function Navbar() {
 
       <nav
         id="mobile-navigation"
+        data-i18n-ignore="true"
         className={`border-t border-slate-200/80 bg-white xl:hidden ${
           menuOpen ? "block" : "hidden"
         }`}

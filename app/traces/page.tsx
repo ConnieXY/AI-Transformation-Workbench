@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import { apiFetch } from "@/lib/api";
 
 interface TraceRow {
   id: string;
@@ -44,7 +43,9 @@ export default function TracesPage() {
 
   useEffect(() => {
     setMounted(true);
-    apiFetch("/api/traces?limit=200")
+    // Public observability metadata does not require a user session. Avoid the
+    // Supabase anonymous-auth handshake used by private/RLS-backed APIs.
+    fetch("/api/traces?limit=200")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("unavailable"))))
       .then((d) => {
         if (!d?.metrics || !Array.isArray(d?.traces)) {

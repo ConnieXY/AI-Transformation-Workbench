@@ -5,16 +5,27 @@ import { featuredTraces } from "@/data/featured";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const TRACE_QUERY_TIMEOUT_MS = 1500;
+const TRACE_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
+
+function traceResponse(payload: unknown) {
+  return NextResponse.json(payload, {
+    headers: { "Cache-Control": TRACE_CACHE_CONTROL },
+  });
+}
+
 /** Trace 列表 + 聚合指标（Trace Viewer 数据源）。 */
 export async function GET(req: Request) {
   const supabase = getSupabaseAdmin();
   // 公网无 DB → 展示固化的真实 trace 快照
-  if (!supabase) return NextResponse.json(featuredTraces);
+  if (!supabase) return traceResponse(featuredTraces);
 
   const url = new URL(req.url);
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "100"), 500);
 
   let data;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRACE_QUERY_TIMEOUT_MS);
   try {
     const result = await supabase
       .from("llm_traces")
@@ -22,14 +33,17 @@ export async function GET(req: Request) {
         "id, step, provider, model, operation, status, input_tokens, output_tokens, cost_usd, latency_ms, entity_type, entity_id, created_at",
       )
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .limit(limit)
+      .abortSignal(controller.signal);
 
     // Trace Viewer is a public portfolio surface. If the live telemetry store is
     // temporarily unreachable, keep the approved public snapshot available.
-    if (result.error) return NextResponse.json(featuredTraces);
+    if (result.error) return traceResponse(featuredTraces);
     data = result.data;
   } catch {
-    return NextResponse.json(featuredTraces);
+    return traceResponse(featuredTraces);
+  } finally {
+    clearTimeout(timeout);
   }
 
   const rows = data ?? [];
@@ -56,5 +70,5 @@ export async function GET(req: Request) {
     p95: pct(95),
   };
 
-  return NextResponse.json({ metrics, traces: rows });
+  return traceResponse({ metrics, traces: rows });
 }
