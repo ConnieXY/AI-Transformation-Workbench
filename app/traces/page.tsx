@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import featuredTraceSnapshot from "@/data/featured/traces.json";
 
 interface TraceRow {
   id: string;
@@ -28,6 +29,11 @@ interface Metrics {
   p95: number;
 }
 
+const featured = featuredTraceSnapshot as {
+  metrics: Metrics;
+  traces: TraceRow[];
+};
+
 function fmtTime(iso: string): string {
   const d = new Date(iso);
   const p = (n: number) => String(n).padStart(2, "0");
@@ -35,27 +41,27 @@ function fmtTime(iso: string): string {
 }
 
 export default function TracesPage() {
-  const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [traces, setTraces] = useState<TraceRow[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [metrics, setMetrics] = useState<Metrics>(featured.metrics);
+  const [traces, setTraces] = useState<TraceRow[]>(featured.traces);
 
   useEffect(() => {
-    setMounted(true);
+    const controller = new AbortController();
     // Public observability metadata does not require a user session. Avoid the
     // Supabase anonymous-auth handshake used by private/RLS-backed APIs.
-    fetch("/api/traces?limit=200")
+    fetch("/api/traces?limit=200", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("unavailable"))))
       .then((d) => {
-        if (!d?.metrics || !Array.isArray(d?.traces)) {
+        if (!d?.metrics || !Array.isArray(d?.traces) || d.traces.length === 0) {
           throw new Error("invalid trace response");
         }
         setMetrics(d.metrics);
         setTraces(d.traces);
       })
-      .catch(() => setError("Trace 数据不可用（需配置后端）。"))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        // Keep the approved public snapshot already rendered on screen.
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
@@ -81,24 +87,22 @@ export default function TracesPage() {
       </section>
 
       <div className="container-page py-10 sm:py-12">
-        {mounted && metrics && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            <Metric label="调用次数" value={String(metrics.total)} />
-            <Metric
-              label="错误率"
-              value={
-                metrics.total
-                  ? `${Math.round((metrics.errors / metrics.total) * 100)}%`
-                  : "0%"
-              }
-              alert={metrics.errors > 0}
-            />
-            <Metric label="总成本" value={`$${metrics.totalCostUsd}`} />
-            <Metric label="总 tokens" value={metrics.totalTokens.toLocaleString()} />
-            <Metric label="P50 延迟" value={`${metrics.p50} ms`} />
-            <Metric label="P95 延迟" value={`${metrics.p95} ms`} />
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <Metric label="调用次数" value={String(metrics.total)} />
+          <Metric
+            label="错误率"
+            value={
+              metrics.total
+                ? `${Math.round((metrics.errors / metrics.total) * 100)}%`
+                : "0%"
+            }
+            alert={metrics.errors > 0}
+          />
+          <Metric label="总成本" value={`$${metrics.totalCostUsd}`} />
+          <Metric label="总 tokens" value={metrics.totalTokens.toLocaleString()} />
+          <Metric label="P50 延迟" value={`${metrics.p50} ms`} />
+          <Metric label="P95 延迟" value={`${metrics.p95} ms`} />
+        </div>
 
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
           <div className="overflow-x-auto">
@@ -115,21 +119,7 @@ export default function TracesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {loading && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-ink-500">
-                      加载中…
-                    </td>
-                  </tr>
-                )}
-                {!loading && error && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-ink-500">
-                      {error}
-                    </td>
-                  </tr>
-                )}
-                {!loading && !error && traces.length === 0 && (
+                {traces.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 py-10 text-center text-ink-500">
                       暂无调用记录。去诊断 / 方案 / 制造业 Demo 触发一次真实 AI 调用后再来查看。
